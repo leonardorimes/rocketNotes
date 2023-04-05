@@ -1,54 +1,119 @@
-import { Fragment } from "react"
-import { Container, Links, Content } from "./styles.js"
-import { Header } from '../../components/Header'
-import { Button } from "../../components/Button/"
-import { Section } from "../../components/Section/"
-import { ButtonText } from "../../components/ButtonText/"
-import { Tag } from '../../components/Tag'
+import { useState, useEffect } from "react";
+import { Container, Links, Content } from "./styles.js";
+import { useParams, useNavigate } from 'react-router-dom';
+
+import { api } from '../../services/api';
+
+import { Header } from '../../components/Header';
+import { Button } from "../../components/Button/";
+import { Section } from "../../components/Section/";
+import { ButtonText } from "../../components/ButtonText/";
+import { Tag } from '../../components/Tag';
 
 
-export function Details(){
-  
-  return(
+export function Details() {
+  const [data, setData] = useState(null)
+
+  const params = useParams();
+  const navigate = useNavigate();
+
+  function handleBack(){
+      navigate("/")
+  }
+
+  async function handleRemove(){
+    
+    const confirm = window.confirm("Deseja realmente remover a nota?");
+
+    if(confirm){
+      await api.delete(`/notes/${params.id}`);
+      handleBack();
+    }
+  }
+
+  useEffect(() => {
+    async function fetchNotes() {
+      const response = await api.get(`/notes/${params.id}`);
+      setData(response.data)
+    }
+
+    fetchNotes();
+  }, [])
+
+  return (
     <Container>
       <Header />
 
-      <main>
-     
-      <Content>
+      {
+        data &&
+        <main>
+
+          <Content>
 
 
-      
-      <ButtonText title="Excluir nota" />
 
-      <h1> Introdução ao React </h1>
+            <ButtonText 
+            title="Excluir nota"
+            onClick={handleRemove}
+            />
 
-      <p>
-        Lorem ipsum, dolor sit amet consectetur adipisicing elit. Voluptatem, molestiae aliquam aliquid, tenetur adipisci ut hic quidem consequuntur atque, nostrum autem? Assumenda dolor dolores sit minus ullam, perspiciatis molestias autem. Lorem ipsum dolor sit amet consectetur adipisicing elit. Iure consectetur asperiores doloribus debitis dolore esse quod, fugiat distinctio voluptas. In ipsam cum amet itaque dolore debitis, alias deleniti quasi provident?
-      </p>
+            <h1> {data.title} </h1>
 
-      <Section title="Links úteis">
-        <Links>
-          <li>
-            <a href="#">https://www.rocketseat.com.br/</a>
-          </li>
+            <p>
+              {data.description}
+            </p>
 
-          <li>
-            <a href="#">https://www.rocketseat.com.br/</a>
-          </li>
-          
-        </Links>
-      </Section>
 
-      
-      <Section title="Marcadores">
-        <Tag title="express" />
-        <Tag title="node" />
 
-      </Section>
-      <Button title="voltar"/>
-      </Content> 
-      </main>
+            {data.links &&
+
+              <Section title="Links úteis">
+                <Links>
+
+
+
+                  {
+
+                    data.links.map(link => (
+                      <li key={String(link.id)}>
+                        <a href={link.url} target="_blank"> {link.url}</a>
+                      </li>
+
+                    ))
+
+                  }
+
+
+                </Links>
+              </Section>
+
+            }
+
+
+            {
+              data.tags &&
+              <Section title="Marcadores">
+             
+           {   
+              data.tags.map(tag => (
+              <Tag
+              key={String(tag.id)}
+              title={tag.name} 
+              />
+           ))
+           }
+         
+
+            </Section>
+            
+            }
+            <Button 
+                title="voltar"
+                onClick={handleBack} />
+          </Content>
+        </main>
+
+      }
     </Container>
   )
 }
