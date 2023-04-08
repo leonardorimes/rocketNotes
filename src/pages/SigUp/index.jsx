@@ -66,7 +66,7 @@ export function SigUp(){
                     onChange = {e => setPassword(e.target.value)}
                 />
 
-                <Button title="Cadastrar" onPress={handleSignUp}>
+                <Button title="Cadastrar" onClick={handleSignUp}>
                     
                 </Button>
 
